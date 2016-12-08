@@ -20,7 +20,7 @@
   Article.createTable = function() {
     // webDb helps us query our data
     webDB.execute(
-      'CREATE TABLE articles (id INTEGER PRIMARY KEY, title VARCHAR(50), category VARCHAR(50), author VARCHAR, authorUrl TEXT, publishedOn DATETIME, body TEXT)', // TODO: What SQL command do we run here inside these quotes?
+      'CREATE TABLE IF NOT EXISTS articles (id INTEGER PRIMARY KEY, title VARCHAR(50), category VARCHAR(50), author VARCHAR, authorUrl VARCHAR, publishedOn DATETIME, body TEXT);', // TODO: What SQL command do we run here inside these quotes?
       function() {
         console.log('Successfully set up the articles table.');
       }
@@ -38,7 +38,7 @@
     webDB.execute(
       [{
         // NOTE: this method will be called elsewhere after we retrieve our JSON
-        'sql': 'INSERT INTO articles (title, category, author, authorUrl, publishedOn, body) VALUES(?, ?, ?, ?, ?, ?)', // <----- TODO: complete our SQL query here, inside the quotes.
+        'sql': 'INSERT INTO articles (title, category, author, authorUrl, publishedOn, body) VALUES(?, ?, ?, ?, ?, ?);', // <----- TODO: complete our SQL query here, inside the quotes.
         'data': [this.title, this.category, this.author, this.authorUrl, this.publishedOn, this.body]
       }]
     );
@@ -61,12 +61,14 @@
               var article = new Article(obj); // This will instantiate an article instance based on each article object from our JSON.
               /* TODO:
                1 - 'insert' the newly-instantiated article in the DB:*/
-              Article.prototype.insertRecord();
+              article.insertRecord();
             });
             webDB.execute(
               'SELECT * FROM articles', // <-----TODO: query our table for articles once more
               function(rows) {
                 // TODO:
+                Article.loadAll(rows);
+                nextFunction();
                 // 1 - Use Article.loadAll to process our rows,
                 // 2 - invoke the function that was passed in to fetchAll
               });
@@ -82,7 +84,7 @@
         {
           /* NOTE: this is an advanced admin option, so you will need to test
               out an individual query in the console */
-          'sql': '', // <---TODO: Delete an article instance from the database based on its id:
+          'sql': 'DELETE FROM articles WHERE id = ?;', // <---TODO: Delete an article instance from the database based on its id:
           'data': [this.id]
         }
       ]
@@ -91,7 +93,7 @@
 
   Article.clearTable = function() {
     webDB.execute(
-      'DELETE ...;' // <----TODO: delete all records from the articles table.
+      'DELETE FROM articles;' // <----TODO: delete all records from the articles table.
     );
   };
 
@@ -134,6 +136,6 @@
   };
 
 // TODO: ensure that our table has been created.
-
+  Article.createTable();
   module.Article = Article;
 })(window);
